@@ -310,7 +310,7 @@ class AtlassianConnect(object):
         return self._provide_client_handler(
             section, event.replace(":", ""), kwargs_updator=_wrapper)
 
-    def module(self, key, name=None, location=None):
+    def module(self, mod, key=None, name=None, location=None):
         """
         Module decorator. See `external modules`_ documentation
 
@@ -344,16 +344,23 @@ class AtlassianConnect(object):
 
         .. _external modules: https://developer.atlassian.com/static/connect/docs/beta/modules/common/web-section.html
         """
-        name = name or key
-        location = location or key
+        mod = mod
+        name = name
+        key = key
+        location = location
         section = 'module'
 
-        self.descriptor.setdefault('modules', {})[location] = {
-            "url": AtlassianConnect._make_path(section, key),
-            "name": {"value": name},
-            "key": key
-
-        }
+        self.descriptor.setdefault('modules', {})[mod] = [
+            {
+                "key": key,
+                "location": location,
+                "name": {"value": name},
+                "url": AtlassianConnect._make_path(section, key),
+                "conditions": [{
+                    "condition": "user_is_logged_in"
+                }]
+            }
+        ]
 
         return self._provide_client_handler(section, key)
 
